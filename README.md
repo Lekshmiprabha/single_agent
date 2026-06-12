@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Single Agent
 
 A single agent implementation for autonomous task execution and decision-making.
@@ -42,3 +43,6 @@ MIT License
 ## Author
 
 Your Name
+=======
+# single_agent
+>>>>>>> 91dd1e084a3547f5d7a03b0b3f4b23aa2020254f
