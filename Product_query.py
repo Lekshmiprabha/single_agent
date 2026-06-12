@@ -1,5 +1,7 @@
 from dotenv import load_dotenv
+from langchain_groq import ChatGroq
 from langchain.tools import tool
+from langgraph.prebuilt import create_react_agent
 
 load_dotenv()
 
@@ -22,7 +24,7 @@ reviews = {
 # --- tool ---
 @tool
 def get_full_product_details(product_name: str) -> str:
-    """Given a product name, returns all details from both products and reviews dictionaries."""
+    """Given a product name, returns all details including price, description, rating and reviews."""
     name = product_name.title()
     if name not in products and name not in reviews:
         return f"Sorry, the product '{name}' is not available in our store."
@@ -36,12 +38,25 @@ def get_full_product_details(product_name: str) -> str:
         f"Reviews     : {r['number_of_reviews']:,} customers have reviewed this product"
     )
 
-# --- loop until quit ---
+# --- agent ---
+llm = ChatGroq(model="llama-3.3-70b-versatile", temperature=0)
+
+agent = create_react_agent(
+    llm,
+    tools=[get_full_product_details],
+    prompt="You are a helpful product assistant for an online tech store. Use the tool to get product details and answer the user's question in a friendly, conversational way."
+)
+
+# --- chat loop ---
+print("Welcome to the Product Assistant! Type 'quit' to exit.\n")
+
 while True:
-    product_name = input("Enter product name (or 'quit' to exit): ")
-    if product_name.lower() == "quit":
+    question = input("You: ")
+
+    if question.lower() == "quit":
         print("Goodbye! 👋")
         break
-    result = get_full_product_details.invoke(product_name)
-    print("\n" + result)
+
+    response = agent.invoke({"messages": question})
+    print(f"\nAssistant: {response['messages'][-1].content}")
     print("-" * 50)
